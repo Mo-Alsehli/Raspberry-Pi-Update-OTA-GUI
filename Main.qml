@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Effects
 import QtQuick.Layouts
+import "components"
 
 Window {
     id: root
@@ -24,23 +25,7 @@ Window {
         anchors.margins: 50
         width: parent.width
 
-        component OnlineCircle: Rectangle {
-            id: mycircle
-            property alias color:  mycircle.color
-            width: 10
-            height: 10
-            radius: 5
-            anchors.verticalCenter: parent.verticalCenter
-        }
 
-        component MyShadow: MultiEffect {
-            id: myshadow
-            shadowBlur: 1.0
-            shadowEnabled: true
-            shadowColor: "#22000000"
-            shadowVerticalOffset: 10
-            shadowHorizontalOffset: 7
-        }
 
         ColumnLayout {
             id: content
@@ -96,7 +81,7 @@ Window {
                             anchors.centerIn: parent
                             spacing: 8
 
-                            OnlineCircle {
+                            OnlineStatusIndicator {
                                 color: "#22c553"
                             }
 
@@ -108,8 +93,8 @@ Window {
                         }
                     }
 
-                    MyShadow {
-                        source: statusBadge
+                    CardShadow {
+                        target: statusBadge
                         anchors.fill: statusBadge
                     }
                 }
@@ -141,6 +126,7 @@ Window {
                             border.width: 1
                             border.color: "#e2e8f0"
                             anchors.bottomMargin: 13
+                            visible: true
                             Column {
                                 anchors.fill: parent
                                 spacing: 20
@@ -174,10 +160,12 @@ Window {
                                     height: 45
 
                                     background: Rectangle {
-                                        color: "#023047"
                                         radius: 15
                                         border.width: 0
+                                        color: "#023047"
+
                                     }
+                                    hoverEnabled: true
 
                                     Row {
                                         spacing: 10
@@ -200,82 +188,15 @@ Window {
                                         }
                                     }
 
-                                    onClicked: {
-                                        // Your button action here
-                                    }
                                 }
                             }
                         }
 
-                        MyShadow {
-                            source: updateArea
+                        CardShadow {
+                            target: updateArea
                             anchors.fill: updateArea
                         }
 
-                        component StatusRect: Rectangle {
-                            id: statusRect
-                            property alias source: img.source
-                            property alias header: statusName.text
-                            property alias machine: machine.text
-                            property alias host: host.text
-
-                            color: "#e5e5e5"
-                            radius: 10
-                            border.width: 1
-                            border.color: "#e2e8f0"
-                            width: parent.width / 2
-                            height: 130
-                            anchors.verticalCenter: parent.verticalCenter
-
-
-                            Column {
-                                width: parent.width / 3
-                                height: parent.height
-                                spacing: 5
-                                anchors.margins: 25
-                                anchors.fill: parent
-                                anchors.left: parent.left
-                                anchors.verticalCenter: parent.verticalCenter
-                                Row {
-                                    spacing: 7
-                                    anchors.left: parent.left
-                                    Image {
-                                        id: img
-                                        width: 27
-                                        height: 27
-                                    }
-
-                                    Text {
-                                        id: statusName
-                                        font.pixelSize: 18
-                                        color: "#6c757d"
-                                    }
-                                }
-
-                                Row {
-                                    spacing: 7
-                                    anchors.left: parent.left
-                                    OnlineCircle {
-                                        color: "#22c553"
-                                    }
-
-                                    Text {
-                                        id: machine
-                                        font.pixelSize: 18
-
-                                    }
-                                }
-
-                                Text {
-                                    id: host
-                                    font.pixelSize: 18
-                                    color: "#6c757d"
-                                }
-
-
-                            }
-
-                        }
 
                         Rectangle {
                             id: systemStatus
@@ -289,11 +210,12 @@ Window {
                             anchors.topMargin: 30
 
                             Column {
-                                width: parent.width
-                                height: parent.height
+                                //width: parent.width
+                                //height: parent.height
                                 anchors.fill: parent
-                                anchors.margins: 30
-                                spacing: 20
+                                anchors.margins: 20
+                                anchors.leftMargin: 30
+                                spacing: 40
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 Rectangle {
                                     id: statusHeader
@@ -301,6 +223,7 @@ Window {
                                     height: 30
                                     anchors.top: parent.top
                                     color: "transparent"
+
                                     Text {
                                         anchors.verticalCenter: parent.verticalCenter
                                         text: "System Status"
@@ -312,51 +235,54 @@ Window {
 
                                 Row {
                                     id: firstStatusRow
-                                    width: parent.width
-                                    anchors.margins: 25
+                                    width: parent.width - 30
+                                    anchors.margins: 10
+                                    anchors.topMargin: 30
                                     spacing: 20
                                     anchors.top: statusHeader.bottom
 
-                                    StatusRect {
-                                        source: "assets/server.png"
-                                        header: qsTr("Server")
-                                        machine: qsTr("QNX VM")
-                                        host: qsTr("Ubuntu Host")
+
+                                    StatusTile {
+                                        iconSource: "../assets/server.png"
+                                        title: qsTr("Server")
+                                        subtitle: qsTr("QNX VM")
+                                        statusText: qsTr("Ubuntu Host")
                                     }
 
-                                    StatusRect {
-                                        source: "assets/ethernet.png"
-                                        header: qsTr("Protocol")
-                                        machine: qsTr("SOME/IP")
-                                        host: qsTr("IDLE")
+                                    StatusTile {
+                                        iconSource: "../assets/ethernet.png"
+                                        title: qsTr("Protocol")
+                                        subtitle: qsTr("SOME/IP")
+                                        statusText: qsTr("IDLE")
                                     }
                                 }
 
                                 Row {
-                                    width: parent.width
-                                    anchors.margins: 25
+                                    width: parent.width - 30
+                                    anchors.margins: 10
                                     spacing: 20
                                     anchors.top: firstStatusRow.bottom
+                                    anchors.topMargin: 20
 
-                                    StatusRect {
-                                        source: "assets/shield.png"
-                                        header: qsTr("CommonAPI")
-                                        machine: qsTr("Connected")
-                                        host: qsTr("v3.2.0")
+                                    StatusTile {
+                                        iconSource: "../assets/shield.png"
+                                        title: qsTr("CommonAPI")
+                                        subtitle: qsTr("Connected")
+                                        statusText: qsTr("v3.2.0")
                                     }
 
-                                    StatusRect {
-                                        source: "assets/blackberry.png"
-                                        header: qsTr("Client")
-                                        machine: qsTr("Running")
-                                        host: qsTr("RPi4")
+                                    StatusTile {
+                                        iconSource: "../assets/blackberry.png"
+                                        title: qsTr("Client")
+                                        subtitle: qsTr("Running")
+                                        statusText: qsTr("RPi4")
                                     }
                                 }
                             }
                         }
 
-                        MyShadow {
-                            source: systemStatus
+                        CardShadow {
+                            target: systemStatus
                             anchors.fill: systemStatus
 
                         }
@@ -385,45 +311,7 @@ Window {
                                 height: parent.height
                                 anchors.fill: parent
                                 anchors.margins: 30
-                                component DeviceText: Rectangle {
-                                    width: parent.width
-                                    height: 40
-                                    color: "transparent"
 
-                                    property alias source: deviceImg.source
-                                    property alias text: deviceName.text
-                                    property alias deviceData: deviceData.text
-
-                                    Row {
-                                        anchors.fill: parent
-                                        width: parent.width
-                                        height: parent.height
-
-                                        Image {
-                                            id: deviceImg
-                                            width: 25
-                                            height: 25
-                                            anchors.left: parent.left
-                                            anchors.verticalCenter: parent.verticalCenter
-                                        }
-
-                                        Text {
-                                            id: deviceName
-                                            font.pixelSize: 18
-                                            anchors.verticalCenter: parent.verticalCenter
-                                            anchors.left: deviceImg.right
-                                            anchors.leftMargin: 12
-                                        }
-
-                                        Text {
-                                            id: deviceData
-                                            font.pixelSize: 18
-                                            anchors.verticalCenter: parent.verticalCenter
-                                            anchors.right: parent.right
-                                            anchors.leftMargin: 12
-                                        }
-                                    }
-                                }
 
                                 Rectangle {
                                     id: infoHeader
@@ -458,26 +346,26 @@ Window {
                                     anchors.top: solidLine.bottom
                                     anchors.topMargin: 20
 
-                                    DeviceText {
-                                        source: "assets/cpu.png"
+                                    MetricRow {
+                                        source: "../assets/cpu.png"
                                         text: qsTr("CPU")
                                         deviceData: qsTr("42%")
                                     }
 
-                                    DeviceText {
-                                        source: "assets/ram.png"
+                                    MetricRow {
+                                        source: "../assets/ram.png"
                                         text: qsTr("Memory")
                                         deviceData: qsTr("1/2 GB")
                                     }
 
-                                    DeviceText {
-                                        source: "assets/memory-card.png"
+                                    MetricRow {
+                                        source: "../assets/memory-card.png"
                                         text: qsTr("Storage")
                                         deviceData: qsTr("8.3/32 GB")
                                     }
 
-                                    DeviceText {
-                                        source: "assets/temp.png"
+                                    MetricRow {
+                                        source: "../assets/temp.png"
                                         text: qsTr("Tempreture")
                                         deviceData: qsTr("60°C")
                                     }
@@ -501,20 +389,20 @@ Window {
                                     anchors.top: solidLine2.bottom
                                     anchors.topMargin: 20
 
-                                    DeviceText {
-                                        source: "assets/blackberry.png"
+                                    MetricRow {
+                                        source: "../assets/blackberry.png"
                                         text: qsTr("Device")
                                         deviceData: qsTr("Raspberry Pi 4")
                                     }
 
-                                    DeviceText {
-                                        source: "assets/blackberry.png"
+                                    MetricRow {
+                                        source: "../assets/blackberry.png"
                                         text: qsTr("Architecture")
                                         deviceData: qsTr("ARM64")
                                     }
 
-                                    DeviceText {
-                                        source: "assets/blackberry.png"
+                                    MetricRow {
+                                        source: "../assets/blackberry.png"
                                         text: qsTr("Uptime")
                                         deviceData: qsTr("12d 4h 23m")
                                     }
@@ -543,54 +431,6 @@ Window {
                                 anchors.margins: 20
 
 
-                                component LogText: Rectangle {
-                                    width: parent.width
-                                    height: 85
-                                    radius: 10
-                                    color: "#e5e5e5"
-                                    border.width: 1
-                                    border.color: "#e2e8f0"
-
-                                    property alias source: logImg.source
-                                    property alias text: logText.text
-                                    property alias myDate: logDate.text
-
-                                    Column {
-                                        anchors.fill: parent
-                                        anchors.margins: 10
-                                        spacing: 15
-                                        Row {
-                                            id: mylog
-                                            width: parent.width
-                                            height: parent.height / 2
-                                            Image {
-                                                id: logImg
-                                                width: 25
-                                                height: 25
-                                                anchors.left: parent.left
-                                            }
-
-                                            Text {
-                                                id: logText
-                                                anchors.left: logImg.right
-                                                font.pixelSize: 20
-                                                anchors.leftMargin: 10
-                                            }
-                                        }
-
-                                        Row {
-                                            width: parent.width
-                                            anchors.top: mylog.bottom
-                                            Text {
-                                                id:  logDate
-                                                font.pixelSize: 18
-                                                color: "#1e293b"
-                                            }
-                                        }
-                                    }
-
-                                }
-
 
 
                                 ScrollView {
@@ -604,27 +444,27 @@ Window {
                                         width: parent.width
                                         spacing: 10
 
-                                        DeviceText {
+                                        MetricRow {
                                             id: logsheader
-                                            source: "assets/log.png"
+                                            source: "../assets/log.png"
                                             text: "Activity Logs"
                                             deviceData: ""
                                         }
 
-                                        LogText {
-                                            source: "assets/info.png"
+                                        LogEntry {
+                                            source: "../assets/info.png"
                                             text: "Dashboard reset"
                                             myDate: "04:03:16 PM"
                                         }
 
-                                        LogText {
-                                            source: "assets/info.png"
+                                        LogEntry {
+                                            source: "../assets/info.png"
                                             text: "Update file received"
                                             myDate: "04:04:10 PM"
                                         }
 
-                                        LogText {
-                                            source: "assets/info.png"
+                                        LogEntry {
+                                            source: "../assets/info.png"
                                             text: "CRC check passed"
                                             myDate: "04:05:30 PM"
                                         }
