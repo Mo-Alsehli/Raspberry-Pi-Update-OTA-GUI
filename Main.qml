@@ -11,6 +11,9 @@ Window {
     visible: true
     title: qsTr("OTA Update Manager")
 
+    // Custom Properties
+    property string updateState: "idle"
+
     // Background
     Rectangle {
         anchors.fill: parent
@@ -117,80 +120,71 @@ Window {
                         width: parent.width * 0.70
                         height: parent.height
                         spacing: 25
+
                         Rectangle {
                             id: updateArea
                             width: parent.width
-                            height: (parent.height / 3)
-                            color: "#fefae0"
+                            height: updateLoader.item ? updateLoader.item.implicitHeight: implicitHeight
                             radius: 15
                             border.width: 1
                             border.color: "#e2e8f0"
-                            anchors.bottomMargin: 13
-                            visible: true
-                            Column {
-                                anchors.fill: parent
-                                spacing: 20
-                                anchors.margins: 30
+                            color: "transparent"
 
-                                Image {
-                                    source: "assets/download.png"
-                                    opacity: 0.5
-                                    width: 50
-                                    height: 50
-                                    anchors.horizontalCenter: parent.horizontalCenter
-                                }
+                            Timer {
+                                id: checkingDelay
+                                interval: 2000   // 2 seconds
+                                repeat: false
 
-                                Text {
-                                    text: qsTr("Ready")
-                                    font.pixelSize: 18
-                                    anchors.horizontalCenter: parent.horizontalCenter
-                                }
-
-                                Text {
-                                    text: qsTr("Click below to check for system updates")
-                                    font.pixelSize: 14
-                                    anchors.horizontalCenter: parent.horizontalCenter
-                                    color: "#64748b"
-                                }
-
-
-                                Button {
-                                    width: parent.width * 0.85
-                                    anchors.horizontalCenter: parent.horizontalCenter
-                                    height: 45
-
-                                    background: Rectangle {
-                                        radius: 15
-                                        border.width: 0
-                                        color: "#023047"
-
-                                    }
-                                    hoverEnabled: true
-
-                                    Row {
-                                        spacing: 10
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        anchors.horizontalCenter: parent.horizontalCenter
-
-                                        Image {
-                                            source: "assets/refresh.png"
-                                            width: 20
-                                            height: 20
-                                            anchors.verticalCenter: parent.verticalCenter
-                                        }
-
-                                        Text {
-                                            id: checkUpdateText
-                                            text: qsTr("Check for Updates")
-                                            color: "white"
-                                            font.bold: true
-                                            anchors.verticalCenter: parent.verticalCenter
-                                        }
-                                    }
-
+                                onTriggered: {
+                                    updateState = "updateAvailable"
+                                    console.log("Triggered")
                                 }
                             }
+
+                            Loader {
+                                id: updateLoader
+                                anchors.fill: parent
+
+
+
+                                source: {
+                                    switch(updateState){
+                                    case "idle": return "cards/CardIdle.qml"
+                                    case "checking": return "cards/CardChecking.qml"
+                                    case "upToDate": return "cards/CardUpToDate.qml"
+                                    case "updateAvailable": return "cards/CardUpdateAvailable.qml"
+                                    case "requestRefused": return "cards/CardRequestRefused.qml"
+                                    case "downloadUpdate": return "cards/CardDownloading.qml"
+                                    case "downloadFinished": return "cards/CardDownloadFinished.qml"
+                                    default: return "cards/CardIdle.qml"
+                                    }
+                                }
+
+                                onLoaded: {
+                                    if(item && item.requestUpdate) {
+                                        item.requestUpdate.connect(() => updateState = "checking" )
+                                    }
+
+                                    if(item && item.returnRequested) {
+                                        item.returnRequested.connect(() => updateState = "idle" )
+                                    }
+
+                                    if(item && item.checkForUpdate){
+                                        item.checkForUpdate.connect(() => {
+                                            updateState = "upToDate"
+                                        })
+                                    }
+
+                                    if(item && item.downloadUpdate){
+                                            item.downloadUpdate.connect(() => updateState = "downloadUpdate")
+                                        }
+
+                                    if(item && item.updateReceived){
+                                        item.updateReceived.connect(()=> updateState = "downloadFinished")
+                                    }
+                            }
                         }
+                    }
 
                         CardShadow {
                             target: updateArea

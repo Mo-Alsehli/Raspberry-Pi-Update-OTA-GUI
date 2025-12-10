@@ -30,6 +30,18 @@ qt_add_qml_module(appqnxOta
         QML_FILES components/StatusTile.qml
         QML_FILES components/MetricRow.qml
         QML_FILES components/LogEntry.qml
+        QML_FILES cards/CardIdle.qml
+        QML_FILES cards/CardChecking.qml
+        QML_FILES components/PrimaryButton.qml
+        QML_FILES cards/CardUpToDate.qml
+        RESOURCES assets/checkmark.png
+        QML_FILES cards/CardUpdateAvailable.qml
+        RESOURCES assets/download-update.png
+        QML_FILES cards/CardRequestRefused.qml
+        RESOURCES assets/error.png
+        QML_FILES cards/CardDownloading.qml
+        QML_FILES cards/CardDownloadFinished.qml
+        RESOURCES assets/power.png
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
