@@ -171,7 +171,7 @@ Window {
 
                                     if(item && item.checkForUpdate){
                                         item.checkForUpdate.connect(() => {
-                                            updateState = "upToDate"
+                                            updateState = "updateAvailable"
                                         })
                                     }
 
