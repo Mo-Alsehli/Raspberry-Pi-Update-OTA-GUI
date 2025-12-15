@@ -14,11 +14,26 @@ Rectangle {
     border.color: "#e2e8f0"
 
     property int progressPercent: otaController.progress
-    property int downloadedMB: 0
-    property int totalMB: 0
-    property real speedMB: 0.0
-    property int chunksReceived: Math.ceil(progressPercent / (100 / totalChunks))
-    property int totalChunks: 10
+    property int downloadedMB: Math.round((progressPercent / 100) * totalMB)
+    property int totalMB: Math.round(otaController.totalSize / (1024 * 1024))
+    property real speedMB: otaController.speedMBps.toFixed(1)
+    property int chunksReceived: otaController.chunksReceived
+    property int totalChunks: otaController.totalChunks
+
+    property int uiSegments: 20
+    property int currentSegment: {
+        if (totalChunks <= 0)
+            return 0;
+
+        return Math.min(
+            uiSegments - 1,
+            Math.floor((chunksReceived * uiSegments) / totalChunks)
+        );
+    }
+
+
+
+
 
     Column {
         id: mainColumn
@@ -210,7 +225,7 @@ Rectangle {
                             }
 
                             Text {
-                                text: downloadedMB + " MB"
+                                text: totalMB + " MB"
                                 font.bold: true
                             }
                         }
@@ -225,6 +240,7 @@ Rectangle {
                     color: "#1e293b"
                 }
 
+
                 Row {
                     id: chunkRow
                     spacing: 10
@@ -236,21 +252,23 @@ Rectangle {
                         property color pendingColor:  "#DCE3ED"
 
                     Repeater {
-                        model: totalChunks > 10 ? 10 : totalChunks
+                        model: uiSegments
 
                         Rectangle {
-                            width: 105
-                            height: 60
-                            radius: 6
+                            width: (chunkRow.width - (uiSegments - 1) * chunkRow.spacing) / uiSegments
+                            height: 16
+                            radius: 4
                             color: {
-                                if (index < chunksReceived - 1) {
+                                if (index < currentSegment ||
+                                    (chunksReceived >= totalChunks && index === currentSegment)) {
                                     return chunkRow.receivedColor;
-                                } else if (index === chunksReceived - 1) {
+                                } else if (index === currentSegment) {
                                     return chunkRow.currentColor;
                                 } else {
                                     return chunkRow.pendingColor;
                                 }
                             }
+
                         }
                     }
                 }

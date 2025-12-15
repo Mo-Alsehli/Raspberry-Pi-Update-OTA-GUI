@@ -12,7 +12,7 @@ Rectangle {
     border.width: 1
     border.color: "#e2e8f0"
 
-    property real updateSize: 10
+    property real updateSize: Math.round(otaController.totalSize / (1024 * 1024))
     property string updateVersion: "1.0.0"
     property string updateDate: "9 Dec, 2025"
 
@@ -73,7 +73,7 @@ Rectangle {
                         anchors.left: parent.left
                     }
                     Text {
-                        text: updateAvailable.updateSize + " GB"
+                        text: updateAvailable.updateSize + " MB"
                         font.pixelSize: 18
                         color: "#1e293b"
                         anchors.right: parent.right

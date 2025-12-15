@@ -46,7 +46,7 @@ Rectangle {
             spacing: 7
             anchors.left: parent.left
             OnlineStatusIndicator {
-                color: "#22c553"
+                connected: otaController.serverConnected
             }
 
             Text {

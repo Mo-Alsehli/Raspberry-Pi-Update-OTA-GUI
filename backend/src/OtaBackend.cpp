@@ -45,6 +45,11 @@ void OtaBackend::setErrorCallback(ErrorCallback cb){
     errorCb_ = std::move(cb);
 }
 
+void OtaBackend::setChunkCallback(ChunkCallback cb) {
+    chunkCb_ = std::move(cb);
+}
+
+
 bool OtaBackend::init() {
     ensureClientDir();
 
@@ -220,6 +225,7 @@ void OtaBackend::onChunk(uint32_t index,
             }
             return;
         }
+
     }
 
     ofs.write(reinterpret_cast<const char*>(data.data()),
@@ -239,8 +245,21 @@ void OtaBackend::onChunk(uint32_t index,
             finishedCb_();
         }
     }
+
+    uint32_t totalChunks =
+        static_cast<uint32_t>(
+            (updateInfo_.getSize() + CHUNK_SIZE - 1) / CHUNK_SIZE
+            );
+
+    if (chunkCb_) {
+        chunkCb_(index, totalChunks);
+    }
 }
 
 uint64_t OtaBackend::updateSize() const {
     return updateInfo_.getSize();
+}
+
+bool OtaBackend::isServerAvailable() const {
+    return proxy_ && proxy_->isAvailable();
 }

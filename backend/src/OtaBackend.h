@@ -21,6 +21,7 @@ class OtaBackend {
     using ProgressCallback = std::function<void(int)>;
     using FinishedCallback = std::function<void()>;
     using ErrorCallback = std::function<void(const std::string&)>;
+    using ChunkCallback = std::function<void(uint32_t index, uint32_t totalChunks)>;
 
     explicit OtaBackend(const std::string& outputFilename);
     ~OtaBackend();
@@ -30,11 +31,13 @@ class OtaBackend {
     bool requestUpdate(uint32_t currentVersion);
     bool startDownload();
     uint64_t updateSize() const;
+    bool isServerAvailable() const;
 
     // callback setters (called by controller)
     void setProgressCallback(ProgressCallback cb);
     void setFinishedCallback(FinishedCallback cb);
     void setErrorCallback(ErrorCallback cb);
+    void setChunkCallback(ChunkCallback cb);
 
     std::string outputFilename_;
     std::shared_ptr<CommonAPI::Runtime> runtime_;
@@ -52,6 +55,7 @@ class OtaBackend {
     ProgressCallback progressCb_;
     FinishedCallback finishedCb_;
     ErrorCallback errorCb_;
+    ChunkCallback chunkCb_;
 
     std::thread eventThread_;
     std::atomic<bool> running_;

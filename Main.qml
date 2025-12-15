@@ -17,6 +17,10 @@ Window {
     Connections {
         target: otaController
 
+        function onUpdateCheckStarted() {
+            updateState = "checking"
+        }
+
         function onUpdateCheckDone(available) {
             updateState = available ? "updateAvailable" : "upToDate"
         }
@@ -113,11 +117,13 @@ Window {
                             spacing: 8
 
                             OnlineStatusIndicator {
-                                color: "#22c553"
+                                connected: otaController.serverConnected
                             }
 
                             Text {
-                                text: "Connected to QNX Server"
+                                text: otaController.serverConnected
+                                          ? "Connected to QNX Server"
+                                          : "Server Disconnected"
                                 font.pixelSize: 18
                                 color: "#1e293b"
                             }
@@ -180,7 +186,6 @@ Window {
                                 onLoaded: {
                                     if(item && item.requestUpdate) {
                                         item.requestUpdate.connect(() => {
-                                            updateState = "checking"
                                             otaController.checkForUpdate();
                                         })
                                     }
