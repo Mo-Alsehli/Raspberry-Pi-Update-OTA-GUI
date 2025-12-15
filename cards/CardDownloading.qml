@@ -13,11 +13,11 @@ Rectangle {
     border.width: 1
     border.color: "#e2e8f0"
 
-    property int progressPercent: 0
+    property int progressPercent: otaController.progress
     property int downloadedMB: 0
     property int totalMB: 0
     property real speedMB: 0.0
-    property int chunksReceived: 0
+    property int chunksReceived: Math.ceil(progressPercent / (100 / totalChunks))
     property int totalChunks: 10
 
     Column {
@@ -136,7 +136,7 @@ Rectangle {
                     color: "#d0d5dd"
 
                     Rectangle {
-                        width: parent.width * (progressPercent / 100)
+                        width: parent.width * (progressPercent / 100.0)
                         height: parent.height
                         radius: 5
                         color: "#007bff"
@@ -255,21 +255,7 @@ Rectangle {
                     }
                 }
 
-                Timer {
-                    interval: 500
-                    repeat: true
-                    running: true
 
-                    onTriggered: {
-                        if (cardDownloading.chunksReceived < cardDownloading.totalChunks){
-
-                            cardDownloading.chunksReceived++
-                            cardDownloading.progressPercent += 10
-                        } else {
-                            cardDownloading.updateReceived()
-                        }
-                    }
-                }
 
 
             }
@@ -277,5 +263,4 @@ Rectangle {
 
     }
 
-    signal updateReceived()
 }

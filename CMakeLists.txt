@@ -8,9 +8,15 @@ find_package(Qt6 REQUIRED COMPONENTS Quick)
 
 qt_standard_project_setup(REQUIRES 6.8)
 
+add_subdirectory(backend)
+
 qt_add_executable(appqnxOta
     main.cpp
+    OtaController.cpp
+    OtaController.h
 )
+
+
 
 qt_add_qml_module(appqnxOta
     URI qnxOta
@@ -42,6 +48,8 @@ qt_add_qml_module(appqnxOta
         QML_FILES cards/CardDownloading.qml
         QML_FILES cards/CardDownloadFinished.qml
         RESOURCES assets/power.png
+        SOURCES OtaController.cpp
+        SOURCES OtaController.h
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -55,9 +63,29 @@ set_target_properties(appqnxOta PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
 
+find_package(CommonAPI REQUIRED CONFIG)
+find_package(CommonAPI-SomeIP REQUIRED CONFIG)
+find_package(vsomeip3 REQUIRED)
+find_package(Threads REQUIRED)
+
+
 target_link_libraries(appqnxOta
-    PRIVATE Qt6::Quick
+    PRIVATE
+        Qt6::Quick
+        -Wl,--whole-archive ota_backend -Wl,--no-whole-archive # Very Important
+        CommonAPI
+        CommonAPI-SomeIP
+        vsomeip3
+        Threads::Threads
 )
+
+# Prevent dropping libs that are "only" needed for static init
+target_link_options(appqnxOta PRIVATE "-Wl,--no-as-needed")
+
+target_link_libraries(appqnxOta PRIVATE
+    "-Wl,--whole-archive" CommonAPI-SomeIP "-Wl,--no-whole-archive"
+)
+
 
 include(GNUInstallDirs)
 install(TARGETS appqnxOta

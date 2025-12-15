@@ -54,17 +54,4 @@ Rectangle {
 
     }
 
-    Timer {
-        id: autoComplete
-        interval: 2000
-        running: true
-        repeat: false
-
-        onTriggered: {
-            cardChecking.checkForUpdate()
-        }
-    }
-
-
-    signal checkForUpdate()
 }

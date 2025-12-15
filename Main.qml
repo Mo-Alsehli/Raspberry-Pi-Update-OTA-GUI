@@ -14,6 +14,34 @@ Window {
     // Custom Properties
     property string updateState: "idle"
 
+    Connections {
+        target: otaController
+
+        function onUpdateCheckDone(available) {
+            updateState = available ? "updateAvailable" : "upToDate"
+        }
+
+        function onProgressChanged(percent) {
+
+            if(updateState != "downloadUpdate"){
+                updateState = "downloadUpdate"
+            }
+        }
+
+        function onDownloadFinished() {
+            updateState = "downloadFinished"
+        }
+
+        function onDownloadRejected() {
+            updateState = "requestRefused"
+        }
+
+        function onErrorOccurred(message) {
+            console.log("OTA error: ", message)
+            updateState = "requestRefused"
+        }
+    }
+
     // Background
     Rectangle {
         anchors.fill: parent
@@ -130,17 +158,6 @@ Window {
                             border.color: "#e2e8f0"
                             color: "transparent"
 
-                            Timer {
-                                id: checkingDelay
-                                interval: 2000   // 2 seconds
-                                repeat: false
-
-                                onTriggered: {
-                                    updateState = "updateAvailable"
-                                    console.log("Triggered")
-                                }
-                            }
-
                             Loader {
                                 id: updateLoader
                                 anchors.fill: parent
@@ -162,7 +179,10 @@ Window {
 
                                 onLoaded: {
                                     if(item && item.requestUpdate) {
-                                        item.requestUpdate.connect(() => updateState = "checking" )
+                                        item.requestUpdate.connect(() => {
+                                            updateState = "checking"
+                                            otaController.checkForUpdate();
+                                        })
                                     }
 
                                     if(item && item.returnRequested) {
@@ -176,12 +196,13 @@ Window {
                                     }
 
                                     if(item && item.downloadUpdate){
-                                            item.downloadUpdate.connect(() => updateState = "downloadUpdate")
+                                            item.downloadUpdate.connect(() => {
+                                                updateState = "downloadUpdate"
+                                                otaController.startDownload()
+                                            })
                                         }
 
-                                    if(item && item.updateReceived){
-                                        item.updateReceived.connect(()=> updateState = "downloadFinished")
-                                    }
+
                             }
                         }
                     }
