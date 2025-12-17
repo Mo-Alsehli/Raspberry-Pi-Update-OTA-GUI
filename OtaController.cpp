@@ -156,7 +156,7 @@ void OtaController::initialize() {
         // Read current version (fallback to 0 if missing/invalid)
         uint32_t version = 0;
         const QString versionPath =
-            "/home/mmagdi/workspace/QT6_Projects/qnxOta/data/client/update.version";
+            "/home/root/rpi-update-ota/data/client/update.version";
 
         if (!readUint32FromFile(versionPath, version)) {
             version = 0;

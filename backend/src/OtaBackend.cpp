@@ -13,12 +13,12 @@ static const size_t CHUNK_SIZE = 64 * 1024;
 
 static void ensureClientDir() {
     struct stat st;
-    if (stat("/home/mmagdi/workspace/QT6_Projects/qnxOta/data/client", &st) != 0) {
-        mkdir("/home/mmagdi/workspace/QT6_Projects/qnxOta/data/client", 0777);
+    if (stat("/home/root/rpi-update-ota/data/client", &st) != 0) {
+        mkdir("/home/root/rpi-update-ota/data/client", 0777);
     }
     struct stat vf;
-    if (stat("/home/mmagdi/workspace/QT6_Projects/qnxOta/data/client/update.version", &vf) != 0) {
-        std::ofstream versionFile("/home/mmagdi/workspace/QT6_Projects/qnxOta/data/client/update.version");
+    if (stat("/home/root/rpi-update-ota/data/client/update.version", &vf) != 0) {
+        std::ofstream versionFile("/home/root/rpi-update-ota/data/client/update.version");
         if (versionFile.is_open()) {
             versionFile << "0";
             versionFile.close();
@@ -214,7 +214,7 @@ void OtaBackend::onChunk(uint32_t index,
     static std::ofstream ofs;
 
     if (!ofs.is_open()) {
-        std::string path = "/home/mmagdi/workspace/QT6_Projects/qnxOta/data/client/" + outputFilename_;
+        std::string path = "/home/root/rpi-update-ota/data/client/" + outputFilename_;
         std::cout << "[Backend] Opening file: " << path << "\n";
         ofs.open(path.c_str(), std::ios::binary);
         if(!ofs.is_open()){
