@@ -20,6 +20,12 @@
 
 class OtaBackend;
 
+enum CheckUpdateState {
+    Available,
+    UpToDate,
+    ERROR
+};
+
 // helper
 
 
@@ -57,7 +63,7 @@ class OtaController : public QObject {
 
    signals:
     void progressChanged(int percent);
-    void updateCheckDone(bool available);
+    void updateCheckDone(CheckUpdateState);
     void downloadRejected();
     void busyChanged();
     void updateAvailable(bool available);
@@ -89,6 +95,8 @@ class OtaController : public QObject {
     std::atomic<double> speed_{0.0};
     std::atomic<int> totalChunks_{0};
     std::atomic<int> chunksReceived_{0};
+
+    CheckUpdateState updateRequest;
 
 
     std::chrono::steady_clock::time_point downloadStart_;

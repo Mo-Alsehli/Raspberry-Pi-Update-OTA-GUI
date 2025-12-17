@@ -19,7 +19,7 @@
         }
     ],
 
-    "routing": "service-sample",
+    "routing": "server-sample",
 
     "service-discovery": {
         "enable": "true",

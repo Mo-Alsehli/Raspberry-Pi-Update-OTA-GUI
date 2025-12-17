@@ -6,7 +6,7 @@
 #include <chrono>
 
 // ------------------------------------------------------------
-// Helper: read uint32 from a text file (supports decimal or 0x.. hex)
+// Helper: read uint32 from a text file
 // ------------------------------------------------------------
 static bool readUint32FromFile(const QString& path, uint32_t& valueOut) {
     QFile file(path);
@@ -195,12 +195,18 @@ void OtaController::checkForUpdate() {
             return;
         }
 
-        const bool available = (backend_->updateSize() > 0);
+        if(!(backend_->updateSize() > 0) || (backend_->updateInfo_.getResultCode() != 0)) {
+            updateRequest = ERROR;
+        }else if(!(backend_->updateInfo_.getIsNew())) {
+            updateRequest = UpToDate;
+        }else {
+            updateRequest = Available;
+        }
 
-        QMetaObject::invokeMethod(this, [this, available]() {
+        QMetaObject::invokeMethod(this, [this]() {
             setBusy(false);
             emit totalSizeChanged();
-            emit updateCheckDone(available);
+            emit updateCheckDone(updateRequest);
         }, Qt::QueuedConnection);
     });
 }

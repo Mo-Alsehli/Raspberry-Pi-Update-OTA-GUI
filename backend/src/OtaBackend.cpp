@@ -49,7 +49,6 @@ void OtaBackend::setChunkCallback(ChunkCallback cb) {
     chunkCb_ = std::move(cb);
 }
 
-
 bool OtaBackend::init() {
     ensureClientDir();
 
@@ -263,3 +262,5 @@ uint64_t OtaBackend::updateSize() const {
 bool OtaBackend::isServerAvailable() const {
     return proxy_ && proxy_->isAvailable();
 }
+
+

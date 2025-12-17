@@ -32,6 +32,7 @@ class OtaBackend {
     bool startDownload();
     uint64_t updateSize() const;
     bool isServerAvailable() const;
+    ft::FileTransfer::UpdateInfo updateInfo() const;
 
     // callback setters (called by controller)
     void setProgressCallback(ProgressCallback cb);
