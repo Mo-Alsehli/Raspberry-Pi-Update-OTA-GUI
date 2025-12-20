@@ -96,6 +96,25 @@ OtaController::OtaController(QObject* parent)
             Qt::QueuedConnection
             );
     });
+
+    // System Info
+    backend_->setSystemInfoCallback([this](const OtaBackend::SystemInfoSnapshot& snap){
+        QMetaObject::invokeMethod(
+            this,
+            [this, snap](){
+                cpuPercent_ = snap.cpuPercent;
+                memUsed_ = snap.memUsedBytes;
+                memTotal_ = snap.memTotalBytes;
+                stUsed_ = snap.storageUsedBytes;
+                stTotal_ = snap.storageTotalBytes;
+                temperatureC_ = snap.temperatureC;
+
+                emit systemInfoChanged();
+            },
+
+            Qt::QueuedConnection
+        );
+    });
 }
 
 OtaController::~OtaController() = default;
@@ -140,6 +159,40 @@ void OtaController::updateServerConnected() {
         emit serverConnectedChanged(connected);
     }
 }
+
+// System Info
+
+int OtaController::cpuPercent() const {
+    return cpuPercent_.load();
+}
+
+double OtaController::temperatureC() const {
+    return temperatureC_.load();
+}
+
+static QString formatBytesPair(uint64_t used, uint64_t total, bool asGB) {
+    auto toUnit = [asGB](uint64_t b) -> double {
+        if (asGB) return b / (1024.0 * 1024.0 * 1024.0);
+        return b / (1024.0 * 1024.0);
+    };
+
+    const double u = toUnit(used);
+    const double t = toUnit(total);
+
+    if (asGB)
+        return QString("%1/%2 GB").arg(u, 0, 'f', 1).arg(t, 0, 'f', 1);
+    else
+        return QString("%1/%2 MB").arg(u, 0, 'f', 0).arg(t, 0, 'f', 0);
+}
+
+QString OtaController::memoryText() const {
+    return formatBytesPair(memUsed_.load(), memTotal_.load(), false);
+}
+
+QString OtaController::storageText() const {
+    return formatBytesPair(stUsed_.load(), stTotal_.load(), true);
+}
+
 
 void OtaController::runAsync(std::function<void()> task) {
     if (busy_) return;

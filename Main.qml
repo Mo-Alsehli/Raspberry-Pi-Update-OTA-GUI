@@ -273,8 +273,10 @@ Window {
                                 StatusTile {
                                     iconSource: "../assets/shield.png"
                                     title: qsTr("CommonAPI")
-                                    subtitle: qsTr("Connected")
-                                    statusText: qsTr("v3.2.0")
+                                    subtitle: otaController.serverConnected ?
+                                                qsTr("Connected") :
+                                                qsTr("Disconnected")
+                                    statusText: qsTr("v3.2.4")
                                 }
                                 StatusTile {
                                     iconSource: "../assets/blackberry.png"
@@ -343,25 +345,25 @@ Window {
                                 MetricRow {
                                     source: "../assets/cpu.png"
                                     text: qsTr("CPU")
-                                    deviceData: qsTr("42%")
+                                    deviceData: otaController.cpuPercent + "%"
                                 }
 
                                 MetricRow {
                                     source: "../assets/ram.png"
                                     text: qsTr("Memory")
-                                    deviceData: qsTr("1/2 GB")
+                                    deviceData: otaController.memoryText
                                 }
 
                                 MetricRow {
                                     source: "../assets/memory-card.png"
                                     text: qsTr("Storage")
-                                    deviceData: qsTr("8.3/32 GB")
+                                    deviceData: otaController.storageText
                                 }
 
                                 MetricRow {
                                     source: "../assets/temp.png"
                                     text: qsTr("Tempreture")
-                                    deviceData: qsTr("60°C")
+                                    deviceData: otaController.temperatureC + "°C"
                                 }
                             }
 

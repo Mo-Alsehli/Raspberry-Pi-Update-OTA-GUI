@@ -39,6 +39,10 @@ class OtaController : public QObject {
     Q_PROPERTY(double speedMBps READ speedMBps NOTIFY speedChanged)
     Q_PROPERTY(int totalChunks READ totalChunks NOTIFY chunkInfoChanged)
     Q_PROPERTY(int chunksReceived READ chunksReceived NOTIFY chunkInfoChanged)
+    Q_PROPERTY(int cpuPercent READ cpuPercent NOTIFY systemInfoChanged)
+    Q_PROPERTY(QString memoryText READ memoryText NOTIFY systemInfoChanged)
+    Q_PROPERTY(QString storageText READ storageText NOTIFY systemInfoChanged)
+    Q_PROPERTY(double temperatureC READ temperatureC NOTIFY systemInfoChanged)
 
 
    public:
@@ -54,6 +58,11 @@ class OtaController : public QObject {
     double speedMBps() const;
     int totalChunks() const;
     int chunksReceived() const;
+    // system info
+    int cpuPercent() const;
+    QString memoryText() const;
+    QString storageText() const;
+    double temperatureC() const;
 
 
 
@@ -74,6 +83,7 @@ class OtaController : public QObject {
     void totalSizeChanged();
     void speedChanged(double speed);
     void chunkInfoChanged();
+    void systemInfoChanged();
 
 
    private:
@@ -95,6 +105,14 @@ class OtaController : public QObject {
     std::atomic<double> speed_{0.0};
     std::atomic<int> totalChunks_{0};
     std::atomic<int> chunksReceived_{0};
+    // System Info
+    std::atomic<int> cpuPercent_{0};
+    std::atomic<uint64_t> memUsed_{0};
+    std::atomic<uint64_t> memTotal_{0};
+    std::atomic<uint64_t> stUsed_{0};
+    std::atomic<uint64_t> stTotal_{0};
+    std::atomic<double> temperatureC_{0.0};
+
 
     CheckUpdateState updateRequest;
 
