@@ -6,8 +6,9 @@ import "components"
 
 Window {
     id: root
-    width: maximumWidth
-    height: maximumHeight
+    // width: maximumWidth
+    // height: maximumHeight
+    visibility: "Maximized"
     visible: true
     title: qsTr("OTA Update Manager")
 

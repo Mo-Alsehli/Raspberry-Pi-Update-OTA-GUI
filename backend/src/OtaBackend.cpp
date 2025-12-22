@@ -324,7 +324,7 @@ bool OtaBackend::readProcMeminfo(uint64_t& memTotalBytes, uint64_t& memAvailByte
     memTotalBytes = 0;
     memAvailBytes = 0;
 
-    while(std::fscanf(f, "%63s %lu %31s/n", key, &valueKb, unit) == 3) {
+    while(std::fscanf(f, "%63s %lu %31s\n", key, &valueKb, unit) == 3) {
         if(std::strcmp(key, "MemTotal:") == 0) {
             memTotalBytes = valueKb * 1024ULL;
         }else if (std::strcmp(key, "MemAvailable:") == 0) {
