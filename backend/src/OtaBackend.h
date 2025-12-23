@@ -25,7 +25,7 @@
 #endif
 
 #define UPDATE_VERSION_PATH OTA_ROOT "update.version"
-#define DATA_CLIENT_PATH OTA_ROOT "data/client"
+#define DATA_CLIENT_PATH OTA_ROOT "data/client/"
 
 
 
