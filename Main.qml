@@ -395,7 +395,7 @@ Window {
                                 MetricRow {
                                     source: "../assets/blackberry.png"
                                     text: qsTr("Uptime")
-                                    deviceData: qsTr("12d 4h 23m")
+                                    deviceData: otaController.upTimeText
                                 }
                             }
                         }

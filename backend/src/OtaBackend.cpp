@@ -18,12 +18,12 @@ static void ensureClientDir()
 
 {
     struct stat st;
-    if (stat("/home/root/rpi-update-ota/data/client", &st) != 0) {
-        mkdir("/home/root/rpi-update-ota/data/client", 0777);
+    if (stat(DATA_CLIENT_PATH, &st) != 0) {
+        mkdir(DATA_CLIENT_PATH, 0777);
     }
     struct stat vf;
-    if (stat("/home/root/rpi-update-ota/data/client/update.version", &vf) != 0) {
-        std::ofstream versionFile("/home/root/rpi-update-ota/data/client/update.version");
+    if (stat(UPDATE_VERSION_PATH, &vf) != 0) {
+        std::ofstream versionFile(UPDATE_VERSION_PATH);
         if (versionFile.is_open()) {
             versionFile << "0";
             versionFile.close();
@@ -236,7 +236,7 @@ void OtaBackend::onChunk(uint32_t index,
     static std::ofstream ofs;
 
     if (!ofs.is_open()) {
-        std::string path = "/home/root/rpi-update-ota/data/client/" + outputFilename_;
+        std::string path = DATA_CLIENT_PATH + outputFilename_;
         std::cout << "[Backend] Opening file: " << path << "\n";
         ofs.open(path.c_str(), std::ios::binary);
         if(!ofs.is_open()){
@@ -435,18 +435,36 @@ void OtaBackend::pollSystemInfoOnce() {
 
 
 bool OtaBackend::readProcUptime(uint64_t& uptimeSeconds) {
-    FILE* f = std::fopen("/proc/uptime", "r");
-    if(!f) return false;
+    static bool initialized = false;
+    static uint64_t baseUptime = 0;
+    static struct timespec baseTime {};
 
-    double up = 0.0;
-    double idle = 0.0;
+    if (!initialized) {
+        FILE* f = std::fopen("/proc/uptime", "r");
+        if (!f)
+            return false;
 
-    int n = std::fscanf(f, "%lf %lf", &up, &idle);
-    std::fclose(f);
+        double up = 0.0;
+        if (std::fscanf(f, "%lf", &up) != 1) {
+            std::fclose(f);
+            return false;
+        }
 
-    if(n < 1) return false;
+        std::fclose(f);
 
-    uptimeSeconds = static_cast<uint64_t>(up);
+        baseUptime = static_cast<uint64_t>(up);
+        clock_gettime(CLOCK_MONOTONIC, &baseTime);
+
+        initialized = true;
+    }
+
+    struct timespec now {};
+    clock_gettime(CLOCK_MONOTONIC, &now);
+
+    uint64_t elapsed =
+        static_cast<uint64_t>(now.tv_sec - baseTime.tv_sec);
+
+    uptimeSeconds = baseUptime + elapsed;
     return true;
 }
 

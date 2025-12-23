@@ -43,6 +43,7 @@ class OtaController : public QObject {
     Q_PROPERTY(QString memoryText READ memoryText NOTIFY systemInfoChanged)
     Q_PROPERTY(QString storageText READ storageText NOTIFY systemInfoChanged)
     Q_PROPERTY(double temperatureC READ temperatureC NOTIFY systemInfoChanged)
+    Q_PROPERTY(QString upTimeText READ upTimeText NOTIFY systemInfoChanged)
 
 
    public:
@@ -63,6 +64,7 @@ class OtaController : public QObject {
     QString memoryText() const;
     QString storageText() const;
     double temperatureC() const;
+    QString upTimeText() const;
 
 
 
@@ -112,6 +114,7 @@ class OtaController : public QObject {
     std::atomic<uint64_t> stUsed_{0};
     std::atomic<uint64_t> stTotal_{0};
     std::atomic<double> temperatureC_{0.0};
+    std::atomic<uint64_t> upTimeSeconds_{0};
 
 
     CheckUpdateState updateRequest;

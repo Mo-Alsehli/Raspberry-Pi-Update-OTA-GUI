@@ -108,6 +108,7 @@ OtaController::OtaController(QObject* parent)
                 stUsed_ = snap.storageUsedBytes;
                 stTotal_ = snap.storageTotalBytes;
                 temperatureC_ = snap.temperatureC;
+                upTimeSeconds_ = snap.uptimeSeconds;
 
                 emit systemInfoChanged();
             },
@@ -170,6 +171,8 @@ double OtaController::temperatureC() const {
     return temperatureC_.load();
 }
 
+
+
 static QString formatBytesPair(uint64_t used, uint64_t total, bool asGB) {
     auto toUnit = [asGB](uint64_t b) -> double {
         if (asGB) return b / (1024.0 * 1024.0 * 1024.0);
@@ -193,6 +196,30 @@ QString OtaController::storageText() const {
     return formatBytesPair(stUsed_.load(), stTotal_.load(), true);
 }
 
+static QString formatUptime(uint64_t totalSeconds)
+{
+    uint64_t days    = totalSeconds / 86400;
+    totalSeconds    %= 86400;
+
+    uint64_t hours   = totalSeconds / 3600;
+    totalSeconds    %= 3600;
+
+    uint64_t minutes = totalSeconds / 60;
+
+    char buffer[64];
+    std::snprintf(buffer, sizeof(buffer),
+                  "%llu d %02llu h %02llu m",
+                  (unsigned long long)days,
+                  (unsigned long long)hours,
+                  (unsigned long long)minutes);
+
+    return QString(buffer);
+}
+
+QString OtaController::upTimeText() const {
+    return formatUptime(upTimeSeconds_.load());
+}
+
 
 void OtaController::runAsync(std::function<void()> task) {
     if (busy_) return;
@@ -208,8 +235,7 @@ void OtaController::initialize() {
     runAsync([this]() {
         // Read current version (fallback to 0 if missing/invalid)
         uint32_t version = 0;
-        const QString versionPath =
-            "/home/root/rpi-update-ota/data/client/update.version";
+        const QString versionPath = UPDATE_VERSION_PATH;
 
         if (!readUint32FromFile(versionPath, version)) {
             version = 0;

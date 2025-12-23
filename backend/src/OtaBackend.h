@@ -14,8 +14,23 @@
 #include <thread>
 #include <atomic>
 #include <mutex>
+#include <ctime>
+
+#define UBUNTU_PLATFORM 1
+
+#if UBUNTU_PLATFORM == 1
+    #define OTA_ROOT "/home/mmagdi/workspace/QT6_Projects/qnxOta/"
+#else
+    #define OTA_ROOT "/home/root/rpi-update-ota/"
+#endif
+
+#define UPDATE_VERSION_PATH OTA_ROOT "update.version"
+#define DATA_CLIENT_PATH OTA_ROOT "data/client"
+
+
 
 namespace ft = v0::filetransfer::example;
+
 
 class OtaBackend {
    public:
