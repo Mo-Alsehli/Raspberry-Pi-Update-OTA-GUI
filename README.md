@@ -130,85 +130,6 @@ sequenceDiagram
 ```
 
 ---
-
-## 🚀 Installation
-
-### Prerequisites
-
-```bash
-# System Requirements
-- Qt 6.9.2 or higher
-- CMake 3.16+
-- GCC/G++ with C++17 support
-- CommonAPI Core Runtime 3.2.0+
-- CommonAPI SOME/IP Runtime 3.2.0+
-- vsomeip 3.1.20+
-- Boost 1.74+
-```
-
-### Build Instructions
-
-#### 1. Clone the Repository
-```bash
-git clone https://github.com/Mo-Alsehli/QNX-Bridge-OTA.git
-cd QNX-Bridge-OTA/GUI
-```
-
-#### 2. Configure Build Environment
-```bash
-# Set Qt environment (adjust path to your Qt installation)
-export Qt6_DIR=/opt/Qt/6.9.2/gcc_64/lib/cmake/Qt6
-
-# Set CommonAPI paths
-export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
-export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
-```
-
-#### 3. Generate CommonAPI Code (if needed)
-```bash
-# Generate from FIDL definitions
-cd backend
-commonapi-core-generator-linux-x86_64 \
-    -sk ../fidl/FileTransfer.fidl
-
-commonapi-someip-generator-linux-x86_64 \
-    ../fidl/FileTransfer.fdepl
-```
-
-#### 4. Build Application
-```bash
-mkdir -p build && cd build
-cmake ..
-cmake --build . -j$(nproc)
-```
-
-#### 5. Configure SOME/IP
-```bash
-# Edit vsomeip.json for your network
-{
-    "unicast": "192.168.1.100",  # Client IP
-    "netmask": "255.255.255.0",
-    "logging": {
-        "level": "info"
-    },
-    "applications": [
-        {
-            "name": "client-sample",
-            "id": "0x1313"
-        }
-    ],
-    "services": [
-        {
-            "service": "0x1234",
-            "instance": "0x5678",
-            "unreliable": "30509"
-        }
-    ]
-}
-```
-
----
-
 ## 🎮 Usage
 
 ### Running the Application
@@ -230,10 +151,10 @@ export VSOMEIP_APPLICATION_NAME=client-sample
 ┌─────────────────────────────────────┐
 │  [Idle State]                       │
 │                                     │
-│  ○ Status: Checking server...      │
-│  ○ Action: Waiting for connection  │
+│  ○ Status: Checking server...       │
+│  ○ Action: Waiting for connection   │
 │                                     │
-│  [Server Connected: ✓]             │
+│  [Server Connected: ✓]              │
 └─────────────────────────────────────┘
 ```
 
@@ -242,11 +163,11 @@ export VSOMEIP_APPLICATION_NAME=client-sample
 ┌─────────────────────────────────────┐
 │  [Idle State]                       │
 │                                     │
-│  ┌──────────────────────────────┐  │
-│  │  [Check for Updates] Button  │  │
-│  └──────────────────────────────┘  │
+│  ┌──────────────────────────────┐   │
+│  │  [Check for Updates] Button  │   │
+│  └──────────────────────────────┘   │
 │                                     │
-│  System: Current Version 1.5       │
+│  System: Current Version 1.5        │
 └─────────────────────────────────────┘
 ```
 
@@ -255,12 +176,12 @@ export VSOMEIP_APPLICATION_NAME=client-sample
 ┌─────────────────────────────────────┐
 │  [Update Available]                 │
 │                                     │
-│  New Version: 2.0                  │
-│  Size: 856.7 MB                    │
+│  New Version: 2.0                   │
+│  Size: 856.7 MB                     │
 │                                     │
-│  ┌──────────────────────────────┐  │
-│  │  [Download Update] Button    │  │
-│  └──────────────────────────────┘  │
+│  ┌──────────────────────────────┐   │
+│  │  [Download Update] Button    │   │
+│  └──────────────────────────────┘   │
 └─────────────────────────────────────┘
 ```
 
@@ -272,9 +193,9 @@ export VSOMEIP_APPLICATION_NAME=client-sample
 │  Progress: 67%                      │
 │  ███████████████░░░░░░░░            │
 │                                     │
-│  Speed: 12.4 MB/s                  │
-│  Chunks: 856 / 1287                │
-│  Size: 856.7 MB                    │
+│  Speed: 12.4 MB/s                   │
+│  Chunks: 856 / 1287                 │
+│  Size: 856.7 MB                     │
 └─────────────────────────────────────┘
 ```
 
@@ -283,11 +204,11 @@ export VSOMEIP_APPLICATION_NAME=client-sample
 ┌─────────────────────────────────────┐
 │  [Download Finished]                │
 │                                     │
-│  ✓ Update downloaded successfully  │
-│  ✓ Ready to apply                  │
+│  ✓ Update downloaded successfully   │
+│  ✓ Ready to apply                   │
 │                                     │
-│  File: rpi4-update.wic             │
-│  Location: /data/client/           │
+│  File: rpi4-update.wic              │
+│  Location: /data/client/            │
 └─────────────────────────────────────┘
 ```
 
@@ -591,92 +512,6 @@ Row {
 
 ---
 
-## 🐛 Troubleshooting
-
-### Common Issues
-
-#### 1. Service Not Available
-**Symptom**: "Service not available" error on startup
-
-**Solution**:
-```bash
-# Check if QNX server is running
-ping <QNX_SERVER_IP>
-
-# Verify SOME/IP configuration
-cat vsomeip.json | grep unicast
-
-# Check service discovery
-export VSOMEIP_CONFIGURATION=./vsomeip.json
-./appqnxOta
-```
-
-#### 2. Proxy Build Failed
-**Symptom**: "Failed to build proxy after retries"
-
-**Solution**:
-```bash
-# Verify CommonAPI installation
-pkg-config --modversion CommonAPI
-pkg-config --modversion CommonAPI-SomeIP
-
-# Check library paths
-export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
-
-# Regenerate CommonAPI code
-cd backend
-commonapi-core-generator-linux-x86_64 -sk ../fidl/FileTransfer.fidl
-```
-
-#### 3. File Write Permission Error
-**Symptom**: "Failed to open output file"
-
-**Solution**:
-```bash
-# Create data directory with permissions
-mkdir -p data/client
-chmod 777 data/client
-
-# Or run with sudo (not recommended for production)
-sudo ./appqnxOta
-```
-
-#### 4. Qt Module Not Found
-**Symptom**: "Cannot find Qt6 module"
-
-**Solution**:
-```bash
-# Set Qt6 path
-export Qt6_DIR=/opt/Qt/6.9.2/gcc_64/lib/cmake/Qt6
-
-# Verify Qt installation
-qmake --version
-
-# Rebuild with explicit Qt path
-cmake -DQt6_DIR=$Qt6_DIR ..
-```
-
----
-
-## 📊 Performance Considerations
-
-### Memory Usage
-- **Idle**: ~50 MB (Qt runtime + CommonAPI)
-- **Active Download**: ~150 MB (includes chunk buffer)
-- **Peak**: ~200 MB (during large file transfers)
-
-### CPU Usage
-- **Idle**: <5% (event loop + system monitoring)
-- **Download**: 15-25% (SOME/IP processing + UI updates)
-- **Peak**: ~40% (chunk reception + file I/O)
-
-### Network Bandwidth
-- **Chunk Size**: 64 KB per transfer
-- **Typical Speed**: 10-15 MB/s (100 Mbps network)
-- **Protocol Overhead**: ~5% (SOME/IP headers)
-
----
-
 ## 🔒 Security Notes
 
 - No authentication implemented (development prototype)
@@ -684,49 +519,6 @@ cmake -DQt6_DIR=$Qt6_DIR ..
 - No encryption on SOME/IP transport layer
 - Version checking to prevent downgrades
 - **Production Deployment**: Add TLS/DTLS for vsomeip
-
----
-
-## 🧪 Testing
-
-### Manual Testing Checklist
-
-- [ ] Application launches without errors
-- [ ] Server connection indicator shows green
-- [ ] "Check for Updates" button responds
-- [ ] Update available card displays correctly
-- [ ] Download progress updates smoothly
-- [ ] Speed calculation is accurate
-- [ ] Chunk counters increment properly
-- [ ] System metrics update every second
-- [ ] Download finished state appears
-- [ ] Error handling works (disconnect server)
-
-### Automated Testing
-```bash
-# Unit tests (if implemented)
-ctest --output-on-failure
-
-# QML test runner
-qmltestrunner -input tests/
-```
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these guidelines:
-
-1. **Code Style**: Follow Qt/QML naming conventions
-2. **Commits**: Use descriptive commit messages
-3. **Testing**: Test on both Ubuntu and Raspberry Pi
-4. **Documentation**: Update README for new features
-
----
-
-## 📄 License
-
-This project is part of the QNX-Bridge-OTA system and follows the same MIT License.
 
 ---
 
