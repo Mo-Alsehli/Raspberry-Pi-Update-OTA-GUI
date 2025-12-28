@@ -31,12 +31,19 @@ static void ensureClientDir()
     }
 }
 
+
 OtaBackend::OtaBackend(const std::string& outputFilename)
     : outputFilename_(outputFilename), running_(false) {}
 
 OtaBackend::~OtaBackend() {
     stop();
 }
+
+/*
+ * ==============================================================
+ * Callback function provided for the UI Controller
+ * ==============================================================
+ */
 
 void OtaBackend::setProgressCallback(ProgressCallback cb){
     progressCb_ = std::move(cb);
@@ -58,6 +65,18 @@ void OtaBackend::setSystemInfoCallback(SystemInfoCallback cb){
     std::lock_guard<std::mutex> lk(systemInfoCbMutex_);
     systemInfoCb_ = std::move(cb);
 }
+
+/*
+ * ==============================================================
+ * bool init()
+ * ==============================================================
+ * Initializes the OTA Backend
+ * Prepares filesystem
+ * Initializes CommonAPI runtime
+ * Builds and validates SOME/IP Proxy (ensures server is connected)
+ * Subscribes to file transfer event.
+ * Starts system monitoring thread
+ */
 
 bool OtaBackend::init() {
     ensureClientDir();
@@ -165,6 +184,14 @@ void OtaBackend::stop() {
     }
 }
 
+/*
+ * ==============================================================
+ * bool requestUpdate(uint32_t currentVersion)
+ * ==============================================================
+ * Sends a synchronous SOME/IP RPC to query update metadata
+ * Result depends on the clients current version
+ * Server provides SystemInfo for future use
+ */
 bool OtaBackend::requestUpdate(uint32_t currentVersion) {
     if (!proxy_) {
         std::cerr << "[Backend] Proxy not initialized\n";
@@ -202,6 +229,15 @@ bool OtaBackend::requestUpdate(uint32_t currentVersion) {
     return true;
 }
 
+
+/*
+ * ==============================================================
+ * bool startDownload()
+ * ==============================================================
+ * Sends a request via SOME/IP to begin streaming the update file via events
+ * This function only initiates the transfer
+ * Actual devlivery data is handled asynchronously via onChunk()
+ */
 bool OtaBackend::startDownload() {
     if (!proxy_ || !proxy_->isAvailable()) {
         if (errorCb_) {
@@ -229,6 +265,17 @@ bool OtaBackend::startDownload() {
 
     return true;
 }
+
+/*
+ * ==============================================================
+ * void onChunk(uint32_t index, const CommonAPI::ByteBuffer& data, bool lastChunk)
+ * ==============================================================
+ * Called for each file chunk recieved via SOME/IP
+ * Appends chunk data to the output file
+ * Updates progress
+ * Signals completion when the last chunk is recieved
+ * The last chunk is application-level signal indicating end-of-transfer
+ */
 
 void OtaBackend::onChunk(uint32_t index,
                          const CommonAPI::ByteBuffer& data,
@@ -286,6 +333,15 @@ bool OtaBackend::isServerAvailable() const {
 }
 
 // System Info Helper functions
+
+/*
+ * ==============================================================
+ * bool readProcStatCpu(uint64_t&, uint64_t&)
+ * ==============================================================
+ * Reads cumulative CPU time counters from /proc/stat.
+ * The returned values are monotonic since boot and must be differenced
+ * accrss samples to compute CPU usage.
+ */
 bool OtaBackend::readProcStatCpu(uint64_t& idle, uint64_t& total) {
     FILE* f = std::fopen("/proc/stat", "r");
     if(!f) return false;
@@ -313,6 +369,13 @@ bool OtaBackend::readProcStatCpu(uint64_t& idle, uint64_t& total) {
     return true;
 }
 
+/*
+ * ==============================================================
+ * bool readProcMeminfo(uint64_t, uint64_t)
+ * ==============================================================
+ * Reads total and available system memory from /proc/meminfo
+ * Uses MemAvailable
+ */
 bool OtaBackend::readProcMeminfo(uint64_t& memTotalBytes, uint64_t& memAvailBytes){
     FILE* f = std::fopen("/proc/meminfo", "r");
     if(!f) return false;
@@ -368,16 +431,25 @@ bool OtaBackend::readTemperature(double& tempC) {
     return true;
 }
 
+
+/*
+ * ==============================================================
+ * void pollSystemInfoOnce()
+ * ==============================================================
+ * Collects a snapshot of system metrics (CPU, memory, storage, temp, uptime)
+ * Publishes systemInfo the system info callback.
+ */
+
 void OtaBackend::pollSystemInfoOnce() {
     SystemInfoSnapshot snap;
 
-            // timestamp (ms)
+    // timestamp (ms)
     const auto now = std::chrono::steady_clock::now().time_since_epoch();
     snap.timestampMs = static_cast<uint64_t>(
         std::chrono::duration_cast<std::chrono::milliseconds>(now).count()
         );
 
-            // CPU%
+    // CPU%
     uint64_t idle=0,total=0;
     if (readProcStatCpu(idle, total)) {
         if (hasLastCpuSample_) {

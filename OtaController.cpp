@@ -221,6 +221,14 @@ QString OtaController::upTimeText() const {
 }
 
 
+/*
+ * ==============================================================
+ * void runAsync(std::function<void()> task)
+ * ==============================================================
+ * Controller's threading gatekeeper, ensures UI never blocks.
+ * Runs a blocking operation on a detached worker thread.
+ * Uses 'busy_' state to prevent overlapping operations.
+ */
 void OtaController::runAsync(std::function<void()> task) {
     if (busy_) return;
 
@@ -230,6 +238,14 @@ void OtaController::runAsync(std::function<void()> task) {
         task();
     }).detach();
 }
+
+/*
+ * ==============================================================
+ * void initialize()
+ * ==============================================================
+ * Initializes the OTA controller and initializes the backend communication layer
+ * Backend initialization is performed off the GUI thread to avoid blocking the UI
+ */
 
 void OtaController::initialize() {
     runAsync([this]() {

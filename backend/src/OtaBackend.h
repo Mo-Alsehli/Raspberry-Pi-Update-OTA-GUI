@@ -16,7 +16,7 @@
 #include <mutex>
 #include <ctime>
 
-#define UBUNTU_PLATFORM 0
+#define UBUNTU_PLATFORM 1
 
 #if UBUNTU_PLATFORM == 1
     #define OTA_ROOT "/home/mmagdi/workspace/QT6_Projects/qnxOta/"
