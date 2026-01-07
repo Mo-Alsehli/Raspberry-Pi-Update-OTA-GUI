@@ -346,3 +346,22 @@ void OtaController::startDownload() {
                 // Success: keep busy=true until finished/error callback clears it.
     });
 }
+
+void OtaController::applyUpdate() {
+    const QString imagePath = "/data/updates/rootfs.ext4";
+
+    // verify file exists
+    if(!QFile::exists(imagePath)){
+        emit errorOccurred("Update image not found");
+        return;
+    }
+
+    bool applySuccess = true;
+
+    if(!applySuccess){
+        emit errorOccurred("Faild to apply update");
+        return;
+    }
+
+    QProcess::startDetached("systemctl", { "reboot" });
+}

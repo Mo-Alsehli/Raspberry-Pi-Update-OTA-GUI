@@ -12,6 +12,8 @@
 #include <QDebug>
 #include <chrono>
 #include <QMetaObject>
+#include <QProcess>
+
 
 
 
@@ -71,6 +73,7 @@ class OtaController : public QObject {
     Q_INVOKABLE void initialize();
     Q_INVOKABLE void checkForUpdate();
     Q_INVOKABLE void startDownload();
+    Q_INVOKABLE void applyUpdate();
 
    signals:
     void progressChanged(int percent);

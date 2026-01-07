@@ -55,7 +55,7 @@ Rectangle {
             btnColor: down ? "#aa2e00" :
                      (hovered ? "#ff6420" : "#ff4500")
 
-            onClicked: finishedCard.applyUpdate()
+            onClicked: otaController.applyUpdate()
         }
 
         // Secondary button: Return to Dashboard

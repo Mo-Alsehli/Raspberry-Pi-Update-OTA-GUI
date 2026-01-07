@@ -160,7 +160,7 @@ bool OtaBackend::init() {
         using clock = std::chrono::steady_clock;
         auto nextPoll = clock::now();
 
-        const auto pollInterval = std::chrono::seconds(1);
+        const auto pollInterval = std::chrono::seconds(3);
 
         while (running_) {
             const auto now = clock::now();
@@ -169,7 +169,7 @@ bool OtaBackend::init() {
                 pollSystemInfoOnce();
                 nextPoll = now + pollInterval;
             }
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
         std::cout << "[Backend] Event loop thread stopped\n";
     });
