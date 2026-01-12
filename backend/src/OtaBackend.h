@@ -21,11 +21,11 @@
 #if UBUNTU_PLATFORM == 1
     #define OTA_ROOT "/home/mmagdi/workspace/QT6_Projects/qnxOta/"
 #else
-    #define OTA_ROOT "/home/root/rpi-update-ota/"
+    #define OTA_ROOT "/data/"
 #endif
 
 #define UPDATE_VERSION_PATH OTA_ROOT "update.version"
-#define DATA_CLIENT_PATH OTA_ROOT "data/client/"
+#define DATA_CLIENT_PATH OTA_ROOT "updates/client/"
 
 
 

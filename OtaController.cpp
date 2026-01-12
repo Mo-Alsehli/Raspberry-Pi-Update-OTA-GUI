@@ -29,7 +29,7 @@ static bool readUint32FromFile(const QString& path, uint32_t& valueOut) {
 
 OtaController::OtaController(QObject* parent)
     : QObject(parent),
-      backend_(std::make_unique<OtaBackend>("rpi4-update.wic")) {
+      backend_(std::make_unique<OtaBackend>("rootfs.ext4")) {
 
     // ---- Backend → Qt bridge (progress + speed) ----
     backend_->setProgressCallback([this](int percent) {
@@ -348,20 +348,61 @@ void OtaController::startDownload() {
 }
 
 void OtaController::applyUpdate() {
+    runAsync([this]() {
     const QString imagePath = "/data/updates/rootfs.ext4";
+    const QString otaApplyPath = "/usr/sbin/ota-apply";
 
     // verify file exists
     if(!QFile::exists(imagePath)){
-        emit errorOccurred("Update image not found");
+        QMetaObject::invokeMethod(this, [this](){
+            emit errorOccurred("Update image not found");
+        }, Qt::QueuedConnection);
         return;
     }
 
-    bool applySuccess = true;
-
-    if(!applySuccess){
-        emit errorOccurred("Faild to apply update");
+    if (!QFile::exists(otaApplyPath)) {
+        QMetaObject::invokeMethod(this, [this]() {
+            emit errorOccurred("ota-apply tool not found");
+        }, Qt::QueuedConnection);
         return;
     }
 
-    QProcess::startDetached("systemctl", { "reboot" });
+    QProcess proc;
+    proc.setProgram(otaApplyPath);
+    proc.setArguments({"--image", imagePath});
+
+    proc.setProcessEnvironment(QProcessEnvironment::systemEnvironment());
+
+    proc.start();
+
+    if(!proc.waitForFinished(-1)){
+    QMetaObject::invokeMethod(this, [this](){
+            emit errorOccurred("ota-apply did not finish");
+        }, Qt::QueuedConnection);
+        return;
+    }
+
+    const int exitCode = proc.exitCode();
+    const QString stdoutOut = proc.readAllStandardOutput();
+    const QString stderrOut = proc.readAllStandardError();
+
+
+
+        if (exitCode != 0) {
+            QMetaObject::invokeMethod(this, [this, exitCode, stderrOut]() {
+                emit errorOccurred(
+                    QString("ota-apply failed (code %1): %2")
+                        .arg(exitCode)
+                        .arg(stderrOut)
+                );
+            }, Qt::QueuedConnection);
+            return;
+        }
+
+        // SUCCESS → reboot
+        QMetaObject::invokeMethod(this, [this]() {
+            QProcess::startDetached("systemctl", { "reboot" });
+        }, Qt::QueuedConnection);
+
+        });
 }
