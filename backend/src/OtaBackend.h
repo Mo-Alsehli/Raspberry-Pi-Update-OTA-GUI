@@ -84,7 +84,7 @@ class OtaBackend {
                  bool lastChunk);
 
     void pollSystemInfoOnce();
-    static bool readProcStatCpu(uint64_t& idl e, uint64_t& total);
+    static bool readProcStatCpu(uint64_t& idle, uint64_t& total);
     static bool readProcMeminfo(uint64_t& memTotalBytes, uint64_t& memAvailBytes);
     static bool readStorageStatvfs(const std::string& path,
                                   uint64_t& totalBytes,
