@@ -399,6 +399,17 @@ void OtaController::applyUpdate() {
             return;
         }
 
+        QFile file(DATA_CLIENT_PATH);
+        if(!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            qDebug() << "Faild to apply update version to update.version";
+            return;
+        }
+
+        QTextStream out(&file);
+        out << backend_->updateInfo_.getNewVersion();
+
+        file.close();
+
         // SUCCESS → reboot
         QMetaObject::invokeMethod(this, [this]() {
             QProcess::startDetached("systemctl", { "reboot" });
