@@ -399,7 +399,7 @@ void OtaController::applyUpdate() {
             return;
         }
 
-        QFile file(DATA_CLIENT_PATH);
+        QFile file(UPDATE_VERSION_PATH);
         if(!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
             qDebug() << "Faild to apply update version to update.version";
             return;
